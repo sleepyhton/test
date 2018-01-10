@@ -1,0 +1,17 @@
+drop table  if exists uv2;
+create table uv2 stored as rcfile as 
+select  STATIS_DATE,new_to_page_prmtr_1,city_cd,
+count(distinct CASE WHEN trmnl_tp='PC' then member_id ELSE 0 END) as pcUM,
+count(distinct CASE WHEN trmnl_tp='PC' then visitor_id ELSE 0 END) as pcUV,
+count(distinct CASE WHEN trmnl_tp='PC' then pv_id ELSE 0 END) as pcPV,
+sum(distinct CASE WHEN trmnl_tp='PC' then crnt_page_drtn ELSE 0 END) as pcTTOP,
+count(distinct CASE WHEN trmnl_tp <> 'PC' then member_id ELSE 0 END) as wapUM,
+count(distinct CASE WHEN trmnl_tp <> 'PC' then visitor_id ELSE 0 END) as wapUV,
+count(distinct CASE WHEN trmnl_tp <> 'PC' then pv_id ELSE 0 END) as wapPV,
+sum(distinct CASE WHEN trmnl_tp <> 'PC' then crnt_page_drtn ELSE 0 END) as wapTTOP
+from 
+(select STATIS_DATE,new_to_page_prmtr_1,city_cd,trmnl_tp,
+member_id,visitor_id,pv_id,crnt_page_drtn
+from yyfxb.tsor_br_base_pageview_d_kt WHERE STATIS_DATE between "20180101" and "20180107") as a
+right join KP on KP.gds_cd= a.new_to_page_prmtr_1
+group by STATIS_DATE,new_to_page_prmtr_1,city_cd
